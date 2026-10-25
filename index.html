@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="it">
+<head><script>try{if(sessionStorage.getItem("pd_auth")!=="1")document.documentElement.className="locked"}catch(e){document.documentElement.className="locked"}</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portale Didattico · Indice delle risorse</title>
+<style>
+:root{--navy:#13294b;--navy2:#1d3a68;--bord:#7b1e2e;--gold:#a8832f;--paper:#f5f6f8;--card:#ffffff;--ink:#1c2230;--mute:#5b6577;--rule:#d5d9e1;
+--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--sans:"Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+@media (prefers-color-scheme:dark){:root{--paper:#0e1626;--card:#142038;--ink:#e8ebf2;--mute:#9aa6bd;--rule:#2a3a5a;--navy:#0a1424;--bord:#d98a96;--gold:#d3b062}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:1.5rem}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.55 var(--sans)}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.mast{background:var(--navy);color:#fff;border-bottom:4px solid var(--gold)}
+.mast-in{max-width:1180px;margin:0 auto;padding:2.2rem 1.5rem 2rem;display:flex;gap:1.6rem;align-items:center}
+.crest{flex:none;width:76px;height:76px}
+.inst{font:600 .95rem/1.3 var(--serif);letter-spacing:.04em;color:#d9c48c;margin:0 0 .35rem}
+.mast h1{font:600 clamp(1.8rem,4.2vw,2.9rem)/1.1 var(--serif);margin:0;letter-spacing:.005em}
+.mast p.sub{margin:.6rem 0 0;color:#c9d3e6;max-width:60ch}
+.wrap{max-width:1180px;margin:0 auto;padding:2rem 1.5rem 3rem;display:grid;grid-template-columns:260px 1fr;gap:3rem}
+aside{position:sticky;top:1.5rem;align-self:start}
+aside h2{font:600 1.05rem var(--serif);margin:0 0 .7rem;color:var(--navy2);padding-bottom:.5rem;border-bottom:1px solid var(--rule)}
+@media (prefers-color-scheme:dark){aside h2{color:var(--gold)}}
+aside ol{list-style:none;margin:0;padding:0}
+aside li a{display:flex;gap:.7rem;padding:.5rem 0;text-decoration:none;font-size:.95rem;border-bottom:1px solid var(--rule)}
+aside li a:hover{color:var(--bord)}
+.rn{font:600 .95rem var(--serif);color:var(--bord);min-width:1.7rem}
+.search{margin:1.4rem 0 0}
+.search label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:.35rem}
+.search input{width:100%;padding:.6rem .75rem;border:1px solid var(--rule);background:var(--card);color:var(--ink);font:inherit;border-radius:2px}
+.count{margin:1rem 0 0;font-size:.85rem;color:var(--mute)}
+.sec{margin-bottom:3rem}
+.sec-h{display:flex;gap:1.1rem;align-items:flex-start;border-top:3px solid var(--navy);padding-top:1rem;margin-bottom:.4rem}
+@media (prefers-color-scheme:dark){.sec-h{border-top-color:var(--gold)}}
+.rn.big{font-size:2.3rem;line-height:1;min-width:3rem}
+.sec-h h2{font:600 1.7rem/1.2 var(--serif);margin:0;color:var(--navy2)}
+@media (prefers-color-scheme:dark){.sec-h h2{color:var(--ink)}}
+.sec-h p{margin:.25rem 0 0;color:var(--mute)}
+.grp{margin-top:1.6rem}
+.grp h3{font:600 1.1rem var(--serif);margin:0 0 .5rem;color:var(--bord);padding-left:.7rem;border-left:3px solid var(--gold)}
+.list{list-style:none;margin:0;padding:0;background:var(--card);border:1px solid var(--rule)}
+.entry{display:grid;grid-template-columns:1fr 150px auto;gap:1rem;align-items:center;padding:.8rem 1rem;border-bottom:1px solid var(--rule)}
+.entry:last-child{border-bottom:0}
+.entry:hover{background:color-mix(in srgb,var(--gold) 9%,var(--card))}
+.et{display:flex;flex-direction:column;min-width:0}
+.t{font:600 1.02rem var(--serif)}
+.d{font-size:.88rem;color:var(--mute)}
+.k{font-size:.82rem;color:var(--mute)}
+.ls{display:flex;gap:.4rem;justify-content:flex-end;flex-wrap:wrap}
+.lk{text-decoration:none;font-size:.85rem;font-weight:600;padding:.38rem .8rem;border:1px solid var(--navy2);color:var(--navy2);border-radius:2px;white-space:nowrap}
+.lk:first-child{background:var(--navy2);color:#fff}
+.lk:hover{background:var(--bord);border-color:var(--bord);color:#fff}
+@media (prefers-color-scheme:dark){.lk{border-color:var(--gold);color:var(--gold)}.lk:first-child{background:var(--gold);color:#0e1626}.lk:hover{background:#fff;color:#0e1626;border-color:#fff}}
+.empty{display:none;padding:2rem;text-align:center;color:var(--mute);border:1px dashed var(--rule)}
+footer{border-top:1px solid var(--rule);color:var(--mute);font-size:.85rem;text-align:center;padding:1.4rem 1rem 2rem}
+@media (max-width:860px){
+ .wrap{grid-template-columns:1fr;gap:1.5rem}
+ aside{position:static}
+ aside ol{display:grid;grid-template-columns:1fr 1fr;column-gap:1.2rem}
+ .entry{grid-template-columns:1fr;gap:.5rem}
+ .ls{justify-content:flex-start}
+ .mast-in{flex-direction:column;align-items:flex-start}
+}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+@media print{aside,.search{display:none}.wrap{display:block}.lk{border:0;padding:0}}
+
+.locked .wrap,.locked footer{display:none}
+.login{display:none;max-width:440px;margin:3.5rem auto 4rem;padding:0 1.5rem}
+.locked .login{display:block}
+.login-box{background:var(--card);border:1px solid var(--rule);border-top:4px solid var(--bord);padding:2rem 2rem 1.7rem}
+.login-box h2{font:600 1.5rem var(--serif);margin:0 0 .3rem;color:var(--navy2)}
+.login-box p{margin:0 0 1.3rem;color:var(--mute);font-size:.95rem}
+.login-box label{display:block;font-size:.88rem;font-weight:600;margin:0 0 .3rem}
+.login-box input{width:100%;padding:.65rem .75rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);font:inherit;border-radius:2px;margin-bottom:1rem}
+.login-box button{width:100%;padding:.75rem;border:0;background:var(--navy2);color:#fff;font:600 1rem var(--sans);border-radius:2px;cursor:pointer}
+.login-box button:hover{background:var(--bord)}
+.err{color:var(--bord);font-size:.9rem;min-height:1.3em;margin:-.2rem 0 .6rem;font-weight:600}
+.logout{margin-top:1rem;background:none;border:1px solid var(--rule);color:var(--mute);padding:.4rem .8rem;font:inherit;font-size:.85rem;border-radius:2px;cursor:pointer}
+.logout:hover{border-color:var(--bord);color:var(--bord)}
+@media (prefers-color-scheme:dark){.login-box h2{color:var(--ink)}.login-box button{background:var(--gold);color:#0e1626}}
+@media print{.login,.logout{display:none}}
+</style>
+</head>
+<body>
+<header class="mast"><div class="mast-in">
+<svg class="crest" viewBox="0 0 80 80" role="img" aria-label="Emblema"><g fill="none" stroke="#d9c48c" stroke-width="2.2"><circle cx="40" cy="40" r="37"/><path d="M16 30 40 16l24 14z"/><path d="M20 34v22M32 34v22M48 34v22M60 34v22" stroke-width="3"/><path d="M16 60h48M14 65h52"/></g></svg>
+<div><p class="inst">Materiale didattico prodotto da Giancarlo Vettori</p>
+<h1>Portale Didattico di Italiano L2</h1>
+<p class="sub">Indice delle risorse per l’insegnamento dell’italiano come lingua seconda: esercitazioni, lezioni con avatar, test di grammatica e di ascolto.</p></div>
+</div></header>
+<div class="login"><form class="login-box" id="lf" autocomplete="off" novalidate>
+<h2>Accesso riservato</h2><p>Inserisci le credenziali per consultare i materiali.</p>
+<label for="lu">Nome utente</label><input id="lu" type="text" autocomplete="username" autocapitalize="none" spellcheck="false">
+<label for="lp">Password</label><input id="lp" type="password" autocomplete="current-password">
+<div class="err" id="le" role="alert"></div>
+<button type="submit">Accedi</button></form></div>
+<div class="wrap">
+<aside>
+<h2>Sezioni</h2>
+<ol><li><a href="#esercitazioni"><span class="rn">I</span>Esercitazioni interattive</a></li><li><a href="#avatar"><span class="rn">II</span>Avatar e lezioni multilingue</a></li><li><a href="#test"><span class="rn">III</span>Test di grammatica</a></li><li><a href="#ascolto"><span class="rn">IV</span>Test di ascolto</a></li></ol>
+<button class="logout" id="lo" type="button">Esci</button><div class="search"><label for="q">Cerca una risorsa</label><input id="q" type="search" placeholder="Es. futuro, bar, russo…" autocomplete="off"></div>
+<p class="count" id="count" aria-live="polite">37 risorse</p>
+</aside>
+<main>
+<section class="sec" id="esercitazioni"><header class="sec-h"><span class="rn big">I</span><div><h2>Esercitazioni interattive</h2><p>Giochi e attività a tempo per la pratica di grammatica, verbi e lessico.</p></div></header><div class="grp"><h3>Articoli</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Articoli determinativi</span><span class="d">Il, lo, la, l’, i, gli, le.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/articoli/articoli-determinativi%20new.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Articoli indeterminativi</span><span class="d">Un, uno, una, un’.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/articoli/articoli-indeterminativinew.html" target="_blank" rel="noopener">Apri</a></div></li></ul></div><div class="grp"><h3>Essere, avere, stare e i verbi in -are -ere -ire</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Verbo essere</span><span class="d">Coniugazione del presente.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/verbi%20essere%20e%20avere/verbo-essere.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbo essere</span><span class="d">Riempimento a scelta multipla.</span></div><span class="k">Scelta multipla</span><div class="ls"><a class="lk" href="games/verbi%20essere%20e%20avere/verbo-essere-scelta-multipla.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbo avere</span><span class="d">Coniugazione del presente.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/verbi%20essere%20e%20avere/verbo-avere.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbo avere</span><span class="d">Riempimento a scelta multipla.</span></div><span class="k">Scelta multipla</span><div class="ls"><a class="lk" href="games/verbi%20essere%20e%20avere/verbo-avere-scelta-multipla.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbo stare</span><span class="d">Coniugazione del presente.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/verbi%20essere%20e%20avere/verbo-stare.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbi in -are, -ere, -ire</span><span class="d">Le tre coniugazioni regolari.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/verbi%20essere%20e%20avere/verbi-are-ere-ire.html" target="_blank" rel="noopener">Apri</a></div></li></ul></div><div class="grp"><h3>Verbi riflessivi</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Verbo chiamarsi</span><span class="d">Presentarsi e chiedere il nome.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/verbi%20riflessivi/verbo-chiamarsi.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbi riflessivi</span><span class="d">Coniugazione dei riflessivi più comuni.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/verbi%20riflessivi/verbi-riflessivi.html" target="_blank" rel="noopener">Apri</a></div></li></ul></div><div class="grp"><h3>Tempi e modi verbali</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Passato prossimo</span><span class="d">Ausiliare e participio passato.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/passato%20prossimo/passato-prossimo.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Il passato prossimo, lezione in russo</span><span class="d">Spiegazione con avatar per studenti russofoni.</span></div><span class="k">Lezione con avatar</span><div class="ls"><a class="lk" href="games/passato%20prossimo/lezione_passato_prossimo_russo_avatar.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbi all’imperfetto</span><span class="d">Formazione e uso dell’imperfetto.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/imperfetto/verbi-imperfetto.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbi al futuro</span><span class="d">Futuro semplice regolare e irregolare.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/futuro/verbi-futuro.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbi al condizionale</span><span class="d">Condizionale presente.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/condizionale/verbi-condizionale.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Verbi all’imperativo</span><span class="d">Imperativo affermativo e negativo.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/imperativo/verbi-imperativo.html" target="_blank" rel="noopener">Apri</a></div></li></ul></div><div class="grp"><h3>Preposizioni</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Preposizioni articolate</span><span class="d">Di, a, da, in, su con l’articolo.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/preposizioni%20articolate/preposizioni-articolate.html" target="_blank" rel="noopener">Apri</a></div></li></ul></div><div class="grp"><h3>Metodo sillabico e lessico (pre-A1)</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Metodo sillabico</span><span class="d">Lettura per sillabe, livello base.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/metodo%20sillabico/metodo-sillabico.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Metodo sillabico, 4 sillabe</span><span class="d">Parole di quattro sillabe.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/metodo%20sillabico/metodo-sillabico-4-sillabe.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Metodo sillabico, 5 sillabe</span><span class="d">Parole di cinque sillabe.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/metodo%20sillabico/metodo-sillabico-5-sillabe.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Lessico italiano, 300 parole</span><span class="d">Trecento parole con immagini.</span></div><span class="k">Challenge 1 minuto</span><div class="ls"><a class="lk" href="games/metodo%20sillabico/lessico-italiano-300-parole.html" target="_blank" rel="noopener">Apri</a></div></li></ul></div></section><section class="sec" id="avatar"><header class="sec-h"><span class="rn big">II</span><div><h2>Avatar e lezioni multilingue</h2><p>Corso di italiano A1 con docente virtuale, in lingua di partenza degli studenti.</p></div></header><div class="grp"><h3>Lezioni con avatar parlante</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Avatar e video spiegazioni</span><span class="d">Pagina di raccolta delle spiegazioni con avatar.</span></div><span class="k">Lezione con avatar</span><div class="ls"><a class="lk" href="games/avatar%20multilingue/avatar-parlante.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Italiano A1 per albanofoni</span><span class="d">Gjuha italiane A1.</span></div><span class="k">Lezione con avatar</span><div class="ls"><a class="lk" href="games/avatar%20multilingue/italiano-l2-albanese.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Italiano A1 per arabofoni</span><span class="d">اللغة الإيطالية A1</span></div><span class="k">Lezione con avatar</span><div class="ls"><a class="lk" href="games/avatar%20multilingue/italiano-l2-arabo.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Italiano A1 per ispanofoni</span><span class="d">Lengua italiana A1.</span></div><span class="k">Lezione con avatar</span><div class="ls"><a class="lk" href="games/avatar%20multilingue/italiano-l2-espanol.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Italiano A1 per romenofoni</span><span class="d">Limba italiană A1.</span></div><span class="k">Lezione con avatar</span><div class="ls"><a class="lk" href="games/avatar%20multilingue/italiano-l2-rumeno.html" target="_blank" rel="noopener">Apri</a></div></li><li class="entry"><div class="et"><span class="t">Italiano A1 per russofoni</span><span class="d">Итальянский язык A1.</span></div><span class="k">Lezione con avatar</span><div class="ls"><a class="lk" href="games/avatar%20multilingue/italiano-l2-russo.html" target="_blank" rel="noopener">Apri</a></div></li></ul></div></section><section class="sec" id="test"><header class="sec-h"><span class="rn big">III</span><div><h2>Test di grammatica</h2><p>Verifiche da 50 domande ciascuna.</p></div></header><div class="grp"><h3>Morfologia e sintassi</h3><ul class="list"><li class="entry"><div class="et"><span class="t">I comparativi</span><span class="d">50 domande.</span></div><span class="k">Test 50 domande</span><div class="ls"><a class="lk" href="TEST/test-comparativi-50-domande.html" target="_blank" rel="noopener">Apri il test</a></div></li><li class="entry"><div class="et"><span class="t">Test sul futuro semplice</span><span class="d">50 domande.</span></div><span class="k">Test 50 domande</span><div class="ls"><a class="lk" href="TEST/test-futuro-50-domande.html" target="_blank" rel="noopener">Apri il test</a></div></li><li class="entry"><div class="et"><span class="t">L’imperativo</span><span class="d">50 domande.</span></div><span class="k">Test 50 domande</span><div class="ls"><a class="lk" href="TEST/test-imperativo-50-domande.html" target="_blank" rel="noopener">Apri il test</a></div></li><li class="entry"><div class="et"><span class="t">L’imperfetto</span><span class="d">50 domande.</span></div><span class="k">Test 50 domande</span><div class="ls"><a class="lk" href="TEST/test-imperfetto-50-domande.html" target="_blank" rel="noopener">Apri il test</a></div></li><li class="entry"><div class="et"><span class="t">Le preposizioni articolate</span><span class="d">50 domande.</span></div><span class="k">Test 50 domande</span><div class="ls"><a class="lk" href="TEST/test-preposizioni-articolate-50-domande.html" target="_blank" rel="noopener">Apri il test</a></div></li><li class="entry"><div class="et"><span class="t">I verbi modali</span><span class="d">50 domande.</span></div><span class="k">Test 50 domande</span><div class="ls"><a class="lk" href="TEST/test-verbi-modali-50-domande.html" target="_blank" rel="noopener">Apri il test</a></div></li><li class="entry"><div class="et"><span class="t">I verbi riflessivi</span><span class="d">50 domande.</span></div><span class="k">Test 50 domande</span><div class="ls"><a class="lk" href="TEST/test-verbi-riflessivi-50-domande.html" target="_blank" rel="noopener">Apri il test</a></div></li></ul></div></section><section class="sec" id="ascolto"><header class="sec-h"><span class="rn big">IV</span><div><h2>Test di ascolto</h2><p>Video con quiz di comprensione da 50 domande.</p></div></header><div class="grp"><h3>Livello A1</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Ordinare al bar</span><span class="d">Video e quiz di comprensione.</span></div><span class="k">Video e quiz</span><div class="ls"><a class="lk" href="TEST%20ASCOLTO/ASCOLTO%20A1/al-bar-50-domande.html" target="_blank" rel="noopener">Quiz</a><a class="lk" href="TEST%20ASCOLTO/ASCOLTO%20A1/video-ordinare-al-bar.mp4" target="_blank" rel="noopener">Video</a></div></li></ul></div><div class="grp"><h3>Livello A2</h3><ul class="list"><li class="entry"><div class="et"><span class="t">Luca e Sara</span><span class="d">Video, quiz interattivo e quiz in PDF.</span></div><span class="k">Video e quiz</span><div class="ls"><a class="lk" href="TEST%20ASCOLTO/ASCOLTO%20A2/LUCA%20E%20SARA/lucasara.html" target="_blank" rel="noopener">Quiz</a><a class="lk" href="TEST%20ASCOLTO/ASCOLTO%20A2/LUCA%20E%20SARA/lucasara.mp4" target="_blank" rel="noopener">Video</a><a class="lk" href="TEST%20ASCOLTO/ASCOLTO%20A2/LUCA%20E%20SARA/Luca_e_Sara_Quiz_50_domande.pdf" target="_blank" rel="noopener">PDF</a></div></li><li class="entry"><div class="et"><span class="t">Il panino al formaggio</span><span class="d">Il panino e i dialoghi quotidiani.</span></div><span class="k">Video e quiz</span><div class="ls"><a class="lk" href="TEST%20ASCOLTO/ASCOLTO%20A2/PANINO%20AL%20FORMAGGIO/panino-50-domande.html" target="_blank" rel="noopener">Quiz</a><a class="lk" href="TEST%20ASCOLTO/ASCOLTO%20A2/PANINO%20AL%20FORMAGGIO/panino.mp4" target="_blank" rel="noopener">Video</a></div></li></ul></div></section>
+<div class="empty" id="empty">Nessuna risorsa corrisponde alla ricerca.</div>
+</main>
+</div>
+<footer>Materiale didattico prodotto da Giancarlo Vettori</footer>
+<script>
+(function(){
+var q=document.getElementById('q'),rows=[].slice.call(document.querySelectorAll('.entry')),
+secs=[].slice.call(document.querySelectorAll('.sec')),grps=[].slice.call(document.querySelectorAll('.grp')),
+cnt=document.getElementById('count'),empty=document.getElementById('empty');
+function norm(s){return s.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')}
+q.addEventListener('input',function(){
+ var v=norm(q.value.trim()),n=0;
+ rows.forEach(function(r){var ok=!v||norm(r.textContent).indexOf(v)>-1;r.style.display=ok?'':'none';if(ok)n++});
+ grps.forEach(function(g){g.style.display=g.querySelector('.entry:not([style*="none"])')?'':'none'});
+ secs.forEach(function(s){s.style.display=s.querySelector('.entry:not([style*="none"])')?'':'none'});
+ cnt.textContent=n+(n===1?' risorsa':' risorse');
+ empty.style.display=n?'none':'block';
+});
+})();
+</script>
+<script>
+(function(){
+var SALT="pd-vettori-v1",OK=["3e3e92141d92791b65e37054696d66c79ac34e2f4f5302e94e275275a75d02aa"];
+function rotr(v,a){return(v>>>a)|(v<<(32-a))}
+function sha256(s){s=unescape(encodeURIComponent(s));var mp=Math.pow,mw=mp(2,32),r="",w=[],bl=s.length*8,i,j;
+var hs=[],k=[],pc=0,ic={};
+for(var c=2;pc<64;c++){if(!ic[c]){for(i=0;i<313;i+=c)ic[i]=c;hs[pc]=(mp(c,.5)*mw)|0;k[pc++]=(mp(c,1/3)*mw)|0}}
+s+="\x80";while(s.length%64-56)s+="\x00";
+for(i=0;i<s.length;i++){j=s.charCodeAt(i);w[i>>2]|=j<<((3-i)%4)*8}
+w[w.length]=(bl/mw)|0;w[w.length]=bl;
+for(j=0;j<w.length;){var x=w.slice(j,j+=16),old=hs;hs=hs.slice(0,8);
+for(i=0;i<64;i++){var w15=x[i-15],w2=x[i-2],a=hs[0],e=hs[4];
+var t1=hs[7]+(rotr(e,6)^rotr(e,11)^rotr(e,25))+((e&hs[5])^((~e)&hs[6]))+k[i]+(x[i]=(i<16)?x[i]:(x[i-16]+(rotr(w15,7)^rotr(w15,18)^(w15>>>3))+x[i-7]+(rotr(w2,17)^rotr(w2,19)^(w2>>>10)))|0);
+var t2=(rotr(a,2)^rotr(a,13)^rotr(a,22))+((a&hs[1])^(a&hs[2])^(hs[1]&hs[2]));
+hs=[(t1+t2)|0].concat(hs);hs[4]=(hs[4]+t1)|0}
+for(i=0;i<8;i++)hs[i]=(hs[i]+old[i])|0}
+for(i=0;i<8;i++)for(j=3;j+1;j--){var b=(hs[i]>>(j*8))&255;r+=((b<16)?0:"")+b.toString(16)}
+return r}
+var root=document.documentElement,f=document.getElementById("lf"),u=document.getElementById("lu"),p=document.getElementById("lp"),er=document.getElementById("le");
+f.addEventListener("submit",function(ev){ev.preventDefault();
+var hh=sha256(SALT+u.value.trim().toLowerCase()+":"+p.value);
+if(OK.indexOf(hh)>-1){try{sessionStorage.setItem("pd_auth","1")}catch(e){}root.className="";p.value="";er.textContent=""}
+else{er.textContent="Nome utente o password non corretti.";p.value="";p.focus()}});
+document.getElementById("lo").addEventListener("click",function(){try{sessionStorage.removeItem("pd_auth")}catch(e){}root.className="locked";u.value="";p.value="";u.focus()});
+})();
+</script></body>
+</html>
