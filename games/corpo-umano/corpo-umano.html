@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Il Corpo Umano — Gioco di trascinamento</title>
+<style>
+  :root{
+    --paper:#f4efe6; --paper-2:#fbf8f2; --ink:#2b2b28; --ink-soft:#6b665c;
+    --line:#d8cfbe; --terra:#c1502e; --terra-dark:#9c3d21;
+    --sage:#6b8f71; --sage-dark:#4d6b53; --gold:#d9a441;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper); color:var(--ink);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    min-height:100vh; -webkit-font-smoothing:antialiased;
+  }
+  body::before{
+    content:""; position:fixed; inset:0;
+    background-image:radial-gradient(rgba(43,43,40,.055) 1px, transparent 1px);
+    background-size:22px 22px; pointer-events:none; z-index:0;
+  }
+  .wrap{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:24px 20px 36px}
+  header.top{
+    display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;
+    gap:14px;border-bottom:2px solid var(--ink);padding-bottom:14px;margin-bottom:22px;
+  }
+  .brand{display:flex;align-items:center;gap:12px}
+  .seal{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);
+    display:grid;place-items:center;font-size:20px;background:var(--paper-2);flex:0 0 auto}
+  h1{font-size:clamp(22px,3.2vw,34px);line-height:1.05;margin:0;letter-spacing:-.01em;font-weight:600}
+  h1 em{font-style:italic;color:var(--terra)}
+  .sub{margin:4px 0 0;font-size:13.5px;color:var(--ink-soft);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+  .scoreboard{display:flex;gap:10px;font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+  .stat{background:var(--paper-2);border:1.5px solid var(--line);border-radius:10px;
+    padding:7px 13px;text-align:center;min-width:78px}
+  .stat b{display:block;font-size:19px;line-height:1.1;font-variant-numeric:tabular-nums}
+  .stat span{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-soft)}
+  .stat.err b{color:var(--terra)}
+  main{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:22px;align-items:start}
+  .stage{background:var(--paper-2);border:1.5px solid var(--line);border-radius:16px;
+    padding:10px 10px 4px;position:relative;
+    box-shadow:0 1px 0 rgba(43,43,40,.05), 0 18px 40px -30px rgba(43,43,40,.5)}
+  .stage-head{display:flex;justify-content:space-between;align-items:center;
+    padding:6px 8px 2px;font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-soft)}
+  .figure .view{display:none;position:relative;max-width:760px;margin:0 auto}
+  .figure .view.is-active{display:block}
+  .figure .view img{display:block;width:100%;height:auto;border-radius:10px}
+  .zone{position:absolute;cursor:pointer}
+  /* area di rilascio allargata: il pseudo-elemento fa parte della zona per il test di collisione,
+     così è molto più facile centrare il bersaglio (soprattutto col dito) */
+  .zone::after{content:"";position:absolute;inset:-9px;border-radius:12px}
+  .zone .shape{position:absolute;inset:0;border:2px dashed rgba(120,110,90,.8);
+    border-radius:8px;background:rgba(236,228,213,.16);
+    transition:background .25s ease,border-color .25s ease,border-style .25s ease}
+  .zone:hover .shape{background:rgba(227,216,196,.30);border-color:#8d8271}
+  .zone.solved .shape{background:rgba(207,224,210,.55);border:2px solid var(--sage-dark);border-style:solid}
+  .zone.hint .shape{animation:hintPulse 1s ease-in-out 3}
+  @keyframes hintPulse{0%,100%{background:rgba(236,228,213,.16)}50%{background:rgba(246,223,168,.75);border-color:var(--gold);border-width:3px}}
+  .zone.shake{animation:shake .42s cubic-bezier(.36,.07,.19,.97) both}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-6px)}40%,60%{transform:translateX(6px)}}
+  .zone.shake .shape{background:rgba(243,207,196,.6);border-color:var(--terra);border-style:solid;border-width:2.4px}
+  .zlabel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+    font-family:ui-sans-serif,system-ui,sans-serif;font-size:10px;font-weight:600;
+    color:var(--sage-dark);text-align:center;line-height:1.05;opacity:0;
+    transition:opacity .3s ease;pointer-events:none;text-shadow:0 1px 2px rgba(251,248,242,.9)}
+  .zone.solved .zlabel{opacity:1}
+  .zlabel.small{font-size:8.5px}
+  .zlabel.tiny{font-size:7px}
+  .tray{background:var(--paper-2);border:1.5px solid var(--line);border-radius:16px;
+    padding:16px 16px 18px;box-shadow:0 1px 0 rgba(43,43,40,.05), 0 18px 40px -30px rgba(43,43,40,.5)}
+  .tray h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;margin:0 0 4px;
+    font-family:ui-sans-serif,system-ui,sans-serif;color:var(--ink-soft);font-weight:600}
+  .tray p.tip{margin:0 0 14px;font-size:12.5px;line-height:1.45;color:var(--ink-soft);
+    font-family:ui-sans-serif,system-ui,sans-serif}
+  .group{border-top:1px solid var(--line);margin-top:10px;padding-top:8px}
+  .group:first-of-type{border-top:none;margin-top:0;padding-top:0}
+  .group-head{width:100%;display:flex;align-items:center;gap:8px;background:none;border:none;
+    padding:5px 2px;cursor:pointer;font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+    color:var(--ink-soft);text-align:left;transition:color .18s ease}
+  .group-head:hover{color:var(--ink)}
+  .group-head .gname{flex:1}
+  .group-head .gcount{font-size:10.5px;letter-spacing:.03em;background:#ece4d5;color:var(--ink-soft);
+    border-radius:99px;padding:2px 8px;font-variant-numeric:tabular-nums;
+    transition:background .2s ease,color .2s ease}
+  .group.active .group-head{color:var(--ink)}
+  .group.active .group-head .gcount{background:var(--terra);color:#fff}
+  .group.done .group-head .gcount{background:var(--sage);color:#fff}
+  .group-head .chev{font-size:9px;transition:transform .2s ease;color:var(--ink-soft);flex:0 0 auto}
+  .group.active .group-head .chev{transform:rotate(90deg)}
+  .group-body{display:none;padding:8px 0 2px;max-height:340px;overflow-y:auto}
+  .group.active .group-body{display:block}
+  .chips{display:flex;flex-wrap:wrap;gap:7px}
+  .chip{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1.5px solid var(--line);
+    border-radius:999px;padding:7px 12px 7px 9px;font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:12.5px;font-weight:500;color:var(--ink);cursor:grab;user-select:none;-webkit-user-select:none;
+    touch-action:none;transition:transform .12s ease,box-shadow .18s ease,border-color .18s ease,background .18s ease;
+    box-shadow:0 1px 2px rgba(43,43,40,.06)}
+  .chip .dot{width:8px;height:8px;border-radius:50%;background:var(--terra);flex:0 0 auto;transition:background .2s ease}
+  .chip:hover{border-color:#b9ad97;transform:translateY(-1px);box-shadow:0 4px 10px -4px rgba(43,43,40,.3)}
+  .chip:active{cursor:grabbing}
+  .chip.lifted{opacity:.35}
+  .chip.selected{border-color:var(--terra);background:#fdf1ec;box-shadow:0 0 0 3px rgba(193,80,46,.16)}
+  .chip.done{background:#eef4ef;border-color:#bcd2c0;color:var(--sage-dark);cursor:default;
+    text-decoration:line-through;text-decoration-thickness:1px;text-decoration-color:rgba(77,107,83,.5)}
+  .chip.done .dot{background:var(--sage)}
+  .chip.wrong{animation:shake .42s both;border-color:var(--terra);background:#fbe6df}
+  .chip.ghost{position:fixed;z-index:9999;pointer-events:none;margin:0;
+    box-shadow:0 14px 30px -10px rgba(43,43,40,.55);transform:rotate(-2deg) scale(1.04);opacity:.96}
+  .progress{margin-top:16px}
+  .bar{height:7px;border-radius:99px;background:#e6ddcc;overflow:hidden}
+  .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--sage),var(--sage-dark));
+    transition:width .4s cubic-bezier(.2,.8,.2,1)}
+  .progress small{display:block;margin-top:7px;font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:11.5px;color:var(--ink-soft)}
+  .actions{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+  button.btn{font-family:ui-sans-serif,system-ui,sans-serif;font-size:13px;font-weight:600;
+    border-radius:9px;padding:10px 15px;cursor:pointer;border:1.5px solid var(--ink);
+    background:var(--ink);color:var(--paper-2);transition:transform .12s ease,opacity .2s ease}
+  button.btn:hover{transform:translateY(-1px)}
+  button.btn.ghost-btn{background:transparent;color:var(--ink);border-color:var(--line)}
+  button.btn.ghost-btn:hover{border-color:var(--ink)}
+  .msg{margin-top:14px;min-height:22px;font-family:ui-sans-serif,system-ui,sans-serif;
+    font-size:13px;line-height:1.4;color:var(--ink-soft)}
+  .msg.ok{color:var(--sage-dark);font-weight:600}
+  .msg.bad{color:var(--terra-dark);font-weight:600}
+  .figure .view img{transition:filter .18s ease}
+  .figure .view img.recoil{animation:recoil .58s cubic-bezier(.36,.07,.19,.97) both}
+  @keyframes recoil{0%{transform:translate(0,0) rotate(0) scale(1)}12%{transform:translate(-8px,3px) rotate(-1.7deg) scale(1.016)}28%{transform:translate(7px,-2px) rotate(1.4deg) scale(1.011)}44%{transform:translate(-5px,2px) rotate(-1deg) scale(1.008)}62%{transform:translate(4px,-1px) rotate(.7deg) scale(1.004)}80%{transform:translate(-2px,1px) rotate(-.3deg) scale(1.001)}100%{transform:translate(0,0) rotate(0) scale(1)}}
+  .figure .view img.cheer{animation:cheer .7s cubic-bezier(.2,.9,.2,1) both}
+  @keyframes cheer{0%{transform:scale(1)}30%{transform:scale(1.035) rotate(-.6deg)}55%{transform:scale(1.02) rotate(.5deg)}100%{transform:scale(1)}}
+  .pain-flash{position:absolute;inset:0;border-radius:16px;pointer-events:none;opacity:0;z-index:5;
+    background:radial-gradient(circle at 50% 45%, rgba(193,80,46,.45), rgba(193,80,46,0) 68%)}
+  .pain-flash.on{animation:painFlash .62s ease-out both}
+  @keyframes painFlash{0%{opacity:0}16%{opacity:1}100%{opacity:0}}
+  .scream{position:absolute;left:50%;top:5%;transform:translate(-50%,0) scale(.6);z-index:6;
+    pointer-events:none;opacity:0;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:800;
+    font-size:clamp(19px,3.2vw,32px);letter-spacing:.02em;line-height:1;color:#fff;
+    background:var(--terra);border:2.5px solid var(--terra-dark);padding:7px 17px 9px;border-radius:14px;
+    box-shadow:0 10px 24px -10px rgba(156,61,33,.85);text-shadow:0 1px 0 rgba(0,0,0,.2)}
+  .scream::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
+    border-left:9px solid transparent;border-right:9px solid transparent;border-top:10px solid var(--terra-dark)}
+  .scream.on{animation:screamPop .9s cubic-bezier(.2,.9,.2,1) both}
+  @keyframes screamPop{0%{opacity:0;transform:translate(-50%,8px) scale(.55) rotate(-4deg)}20%{opacity:1;transform:translate(-50%,0) scale(1.13) rotate(2deg)}36%{transform:translate(-50%,0) scale(1) rotate(-1deg)}74%{opacity:1;transform:translate(-50%,0) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-12px) scale(.96)}}
+  .yes{position:absolute;left:50%;top:5%;transform:translate(-50%,0) scale(.6);z-index:6;
+    pointer-events:none;opacity:0;font-family:ui-sans-serif,system-ui,sans-serif;font-weight:900;
+    font-size:clamp(22px,3.6vw,38px);letter-spacing:.01em;line-height:1;color:#fff;
+    background:linear-gradient(135deg,#5aa86a,#3f8a52);border:2.5px solid #2f6b3e;
+    padding:8px 20px 10px;border-radius:16px;
+    box-shadow:0 12px 28px -10px rgba(47,107,62,.9);text-shadow:0 1px 0 rgba(0,0,0,.18)}
+  .yes::after{content:"";position:absolute;left:50%;bottom:-9px;transform:translateX(-50%);
+    border-left:9px solid transparent;border-right:9px solid transparent;border-top:10px solid #2f6b3e}
+  .yes.on{animation:yesPop .95s cubic-bezier(.2,.9,.2,1) both}
+  @keyframes yesPop{0%{opacity:0;transform:translate(-50%,10px) scale(.5) rotate(-6deg)}18%{opacity:1;transform:translate(-50%,0) scale(1.22) rotate(3deg)}34%{transform:translate(-50%,0) scale(1) rotate(-2deg)}50%{transform:translate(-50%,0) scale(1.08) rotate(1deg)}76%{opacity:1;transform:translate(-50%,0) scale(1) rotate(0)}100%{opacity:0;transform:translate(-50%,-14px) scale(.95)}}
+  .win{position:absolute;inset:0;border-radius:16px;display:none;place-items:center;text-align:center;
+    padding:24px;background:rgba(251,248,242,.94);backdrop-filter:blur(3px)}
+  .win.show{display:grid;animation:fadeIn .4s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .win h3{font-size:clamp(22px,3vw,30px);margin:0 0 8px}
+  .win p{margin:0 0 18px;font-family:ui-sans-serif,system-ui,sans-serif;font-size:14px;color:var(--ink-soft)}
+  footer.note{margin-top:26px;padding-top:14px;border-top:1px solid var(--line);
+    font-family:ui-sans-serif,system-ui,sans-serif;font-size:11.5px;color:var(--ink-soft);
+    display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+  @media (max-width:1000px){
+    main{grid-template-columns:1fr}
+    .tray{order:2}
+    .figure .view.is-active{max-width:100%}
+    .zone::after{inset:-12px}
+  }
+  @media (max-width:560px){
+    .wrap{padding:16px 12px 28px}
+    .stage{padding:6px 6px 2px}
+    .zone::after{inset:-14px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.001s !important;transition-duration:.001s !important}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">
+      <div class="seal" aria-hidden="true">🫀</div>
+      <div>
+        <h1>Il <em>corpo umano</em></h1>
+        <p class="sub">Trascina ogni parte nel punto giusto. Se indovini, la persona esulta con un <strong>“Yes baby!”</strong> allegro e scherzoso; se sbagli, sentirai un <strong>buzz</strong> e un urlo di dolore.</p>
+      </div>
+    </div>
+    <div class="scoreboard">
+      <div class="stat"><b id="statDone">0</b><span>Completate</span></div>
+      <div class="stat err"><b id="statErr">0</b><span>Errori</span></div>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage" aria-label="Tavola anatomica">
+      <div class="stage-head">
+        <span id="stageTitle">Figura intera</span>
+        <span id="stageHint">63 elementi da collocare</span>
+      </div>
+
+      <div class="figure">
+
+        <div class="view is-active" id="viewCorpo" role="img" aria-label="Corpo umano realistico con zone da riempire">
+          <img src="figura.png" alt="Illustrazione realistica del corpo umano">
+          <div class="zone" data-part="testa" tabindex="0" role="button" aria-label="Testa" style="left:40%;top:2%;width:20%;height:17%">
+            <div class="shape"></div><div class="zlabel">Testa</div>
+          </div>
+          <div class="zone" data-part="collo" tabindex="0" role="button" aria-label="Collo" style="left:44%;top:19%;width:12%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Collo</div>
+          </div>
+          <div class="zone" data-part="spalle" tabindex="0" role="button" aria-label="Spalle" style="left:33%;top:24%;width:34%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Spalle</div>
+          </div>
+          <div class="zone" data-part="torace" tabindex="0" role="button" aria-label="Torace" style="left:36%;top:28%;width:28%;height:10%">
+            <div class="shape"></div><div class="zlabel">Torace</div>
+          </div>
+          <div class="zone" data-part="addome" tabindex="0" role="button" aria-label="Addome" style="left:37%;top:38%;width:26%;height:10%">
+            <div class="shape"></div><div class="zlabel">Addome</div>
+          </div>
+          <div class="zone" data-part="bacino" tabindex="0" role="button" aria-label="Bacino" style="left:36%;top:48%;width:28%;height:8%">
+            <div class="shape"></div><div class="zlabel">Bacino</div>
+          </div>
+          <div class="zone" data-part="braccio_sx" tabindex="0" role="button" aria-label="Braccio (sinistro)" style="left:32%;top:26%;width:8%;height:14%">
+            <div class="shape"></div><div class="zlabel tiny">Braccio (sinistro)</div>
+          </div>
+          <div class="zone" data-part="braccio_dx" tabindex="0" role="button" aria-label="Braccio (destro)" style="left:60%;top:26%;width:8%;height:14%">
+            <div class="shape"></div><div class="zlabel tiny">Braccio (destro)</div>
+          </div>
+          <div class="zone" data-part="gomito_sx" tabindex="0" role="button" aria-label="Gomito (sinistro)" style="left:32%;top:40%;width:8%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Gomito (sinistro)</div>
+          </div>
+          <div class="zone" data-part="gomito_dx" tabindex="0" role="button" aria-label="Gomito (destro)" style="left:60%;top:40%;width:8%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Gomito (destro)</div>
+          </div>
+          <div class="zone" data-part="avambraccio_sx" tabindex="0" role="button" aria-label="Avambraccio (sinistro)" style="left:32%;top:45%;width:8%;height:10%">
+            <div class="shape"></div><div class="zlabel tiny">Avambraccio (sinistro)</div>
+          </div>
+          <div class="zone" data-part="avambraccio_dx" tabindex="0" role="button" aria-label="Avambraccio (destro)" style="left:60%;top:45%;width:8%;height:10%">
+            <div class="shape"></div><div class="zlabel tiny">Avambraccio (destro)</div>
+          </div>
+          <div class="zone" data-part="polso_sx" tabindex="0" role="button" aria-label="Polso (sinistro)" style="left:33%;top:55%;width:7%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Polso (sinistro)</div>
+          </div>
+          <div class="zone" data-part="polso_dx" tabindex="0" role="button" aria-label="Polso (destro)" style="left:60%;top:55%;width:7%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Polso (destro)</div>
+          </div>
+          <div class="zone" data-part="mano_sx" tabindex="0" role="button" aria-label="Mano (sinistra)" style="left:32%;top:59%;width:8%;height:7%">
+            <div class="shape"></div><div class="zlabel tiny">Mano (sinistra)</div>
+          </div>
+          <div class="zone" data-part="mano_dx" tabindex="0" role="button" aria-label="Mano (destra)" style="left:60%;top:59%;width:8%;height:7%">
+            <div class="shape"></div><div class="zlabel tiny">Mano (destra)</div>
+          </div>
+          <div class="zone" data-part="coscia_sx" tabindex="0" role="button" aria-label="Coscia (sinistra)" style="left:38%;top:58%;width:11%;height:14%">
+            <div class="shape"></div><div class="zlabel small">Coscia (sinistra)</div>
+          </div>
+          <div class="zone" data-part="coscia_dx" tabindex="0" role="button" aria-label="Coscia (destra)" style="left:51%;top:58%;width:11%;height:14%">
+            <div class="shape"></div><div class="zlabel small">Coscia (destra)</div>
+          </div>
+          <div class="zone" data-part="ginocchio_sx" tabindex="0" role="button" aria-label="Ginocchio (sinistro)" style="left:39%;top:72%;width:10%;height:6%">
+            <div class="shape"></div><div class="zlabel small">Ginocchio (sinistro)</div>
+          </div>
+          <div class="zone" data-part="ginocchio_dx" tabindex="0" role="button" aria-label="Ginocchio (destro)" style="left:51%;top:72%;width:10%;height:6%">
+            <div class="shape"></div><div class="zlabel small">Ginocchio (destro)</div>
+          </div>
+          <div class="zone" data-part="polpaccio_sx" tabindex="0" role="button" aria-label="Polpaccio (sinistro)" style="left:39%;top:78%;width:10%;height:12%">
+            <div class="shape"></div><div class="zlabel small">Polpaccio (sinistro)</div>
+          </div>
+          <div class="zone" data-part="polpaccio_dx" tabindex="0" role="button" aria-label="Polpaccio (destro)" style="left:51%;top:78%;width:10%;height:12%">
+            <div class="shape"></div><div class="zlabel small">Polpaccio (destro)</div>
+          </div>
+          <div class="zone" data-part="caviglia_sx" tabindex="0" role="button" aria-label="Caviglia (sinistra)" style="left:40%;top:90%;width:9%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Caviglia (sinistra)</div>
+          </div>
+          <div class="zone" data-part="caviglia_dx" tabindex="0" role="button" aria-label="Caviglia (destra)" style="left:51%;top:90%;width:9%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Caviglia (destra)</div>
+          </div>
+          <div class="zone" data-part="piede_sx" tabindex="0" role="button" aria-label="Piede (sinistro)" style="left:38%;top:93%;width:12%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Piede (sinistro)</div>
+          </div>
+          <div class="zone" data-part="piede_dx" tabindex="0" role="button" aria-label="Piede (destro)" style="left:50%;top:93%;width:12%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Piede (destro)</div>
+          </div>
+        </div>
+
+        <div class="view" id="viewFaccia" role="img" aria-label="Primo piano di un volto realistico con zone da riempire">
+          <img src="faccia.png" alt="Illustrazione realistica del volto">
+          <div class="zone" data-part="capelli" tabindex="0" role="button" aria-label="Capelli" style="left:28%;top:12%;width:44%;height:7%">
+            <div class="shape"></div><div class="zlabel small">Capelli</div>
+          </div>
+          <div class="zone" data-part="fronte" tabindex="0" role="button" aria-label="Fronte" style="left:33%;top:19%;width:34%;height:9%">
+            <div class="shape"></div><div class="zlabel">Fronte</div>
+          </div>
+          <div class="zone" data-part="tempia_sx" tabindex="0" role="button" aria-label="Tempia (sinistra)" style="left:22%;top:26%;width:9%;height:10%">
+            <div class="shape"></div><div class="zlabel tiny">Tempia (sinistra)</div>
+          </div>
+          <div class="zone" data-part="tempia_dx" tabindex="0" role="button" aria-label="Tempia (destra)" style="left:69%;top:26%;width:9%;height:10%">
+            <div class="shape"></div><div class="zlabel tiny">Tempia (destra)</div>
+          </div>
+          <div class="zone" data-part="sopracciglia_sx" tabindex="0" role="button" aria-label="Sopracciglio (sinistro)" style="left:30%;top:30%;width:14%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Sopracciglio (sinistro)</div>
+          </div>
+          <div class="zone" data-part="sopracciglia_dx" tabindex="0" role="button" aria-label="Sopracciglio (destro)" style="left:56%;top:30%;width:14%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Sopracciglio (destro)</div>
+          </div>
+          <div class="zone" data-part="occhi_sx" tabindex="0" role="button" aria-label="Occhio (sinistro)" style="left:30%;top:36%;width:14%;height:8%">
+            <div class="shape"></div><div class="zlabel">Occhio (sinistro)</div>
+          </div>
+          <div class="zone" data-part="occhi_dx" tabindex="0" role="button" aria-label="Occhio (destro)" style="left:56%;top:36%;width:14%;height:8%">
+            <div class="shape"></div><div class="zlabel">Occhio (destro)</div>
+          </div>
+          <div class="zone" data-part="zigomo_sx" tabindex="0" role="button" aria-label="Zigomo (sinistro)" style="left:24%;top:44%;width:10%;height:8%">
+            <div class="shape"></div><div class="zlabel small">Zigomo (sinistro)</div>
+          </div>
+          <div class="zone" data-part="zigomo_dx" tabindex="0" role="button" aria-label="Zigomo (destro)" style="left:66%;top:44%;width:10%;height:8%">
+            <div class="shape"></div><div class="zlabel small">Zigomo (destro)</div>
+          </div>
+          <div class="zone" data-part="naso" tabindex="0" role="button" aria-label="Naso" style="left:44%;top:44%;width:12%;height:12%">
+            <div class="shape"></div><div class="zlabel small">Naso</div>
+          </div>
+          <div class="zone" data-part="guancia_sx" tabindex="0" role="button" aria-label="Guancia (sinistra)" style="left:24%;top:52%;width:12%;height:12%">
+            <div class="shape"></div><div class="zlabel small">Guancia (sinistra)</div>
+          </div>
+          <div class="zone" data-part="guancia_dx" tabindex="0" role="button" aria-label="Guancia (destra)" style="left:64%;top:52%;width:12%;height:12%">
+            <div class="shape"></div><div class="zlabel small">Guancia (destra)</div>
+          </div>
+          <div class="zone" data-part="bocca" tabindex="0" role="button" aria-label="Bocca" style="left:40%;top:58%;width:20%;height:7%">
+            <div class="shape"></div><div class="zlabel small">Bocca</div>
+          </div>
+          <div class="zone" data-part="mento" tabindex="0" role="button" aria-label="Mento" style="left:40%;top:66%;width:20%;height:8%">
+            <div class="shape"></div><div class="zlabel">Mento</div>
+          </div>
+          <div class="zone" data-part="orecchie_sx" tabindex="0" role="button" aria-label="Orecchio (sinistro)" style="left:9%;top:38%;width:11%;height:18%">
+            <div class="shape"></div><div class="zlabel small">Orecchio (sinistro)</div>
+          </div>
+          <div class="zone" data-part="orecchie_dx" tabindex="0" role="button" aria-label="Orecchio (destro)" style="left:80%;top:38%;width:11%;height:18%">
+            <div class="shape"></div><div class="zlabel small">Orecchio (destro)</div>
+          </div>
+          <div class="zone" data-part="collo_f" tabindex="0" role="button" aria-label="Collo" style="left:35%;top:78%;width:30%;height:10%">
+            <div class="shape"></div><div class="zlabel">Collo</div>
+          </div>
+        </div>
+
+        <div class="view" id="viewOrgani" role="img" aria-label="Busto umano realistico con gli organi interni da riempire">
+          <img src="organi.png" alt="Illustrazione realistica degli organi interni">
+          <div class="zone" data-part="cervello" tabindex="0" role="button" aria-label="Cervello" style="left:38%;top:5%;width:24%;height:13%">
+            <div class="shape"></div><div class="zlabel">Cervello</div>
+          </div>
+          <div class="zone" data-part="laringe" tabindex="0" role="button" aria-label="Laringe" style="left:46%;top:24%;width:8%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Laringe</div>
+          </div>
+          <div class="zone" data-part="trachea" tabindex="0" role="button" aria-label="Trachea" style="left:47%;top:28%;width:6%;height:8%">
+            <div class="shape"></div><div class="zlabel tiny">Trachea</div>
+          </div>
+          <div class="zone" data-part="esofago" tabindex="0" role="button" aria-label="Esofago" style="left:47%;top:36%;width:6%;height:6%">
+            <div class="shape"></div><div class="zlabel tiny">Esofago</div>
+          </div>
+          <div class="zone" data-part="polmone_sx" tabindex="0" role="button" aria-label="Polmone (sinistro)" style="left:30%;top:38%;width:19%;height:18%">
+            <div class="shape"></div><div class="zlabel">Polmone (sinistro)</div>
+          </div>
+          <div class="zone" data-part="polmone_dx" tabindex="0" role="button" aria-label="Polmone (destro)" style="left:51%;top:38%;width:19%;height:18%">
+            <div class="shape"></div><div class="zlabel">Polmone (destro)</div>
+          </div>
+          <div class="zone" data-part="cuore" tabindex="0" role="button" aria-label="Cuore" style="left:44%;top:42%;width:13%;height:12%">
+            <div class="shape"></div><div class="zlabel small">Cuore</div>
+          </div>
+          <div class="zone" data-part="diaframma" tabindex="0" role="button" aria-label="Diaframma" style="left:30%;top:55%;width:40%;height:3%">
+            <div class="shape"></div><div class="zlabel tiny">Diaframma</div>
+          </div>
+          <div class="zone" data-part="fegato" tabindex="0" role="button" aria-label="Fegato" style="left:31%;top:58%;width:22%;height:11%">
+            <div class="shape"></div><div class="zlabel">Fegato</div>
+          </div>
+          <div class="zone" data-part="stomaco" tabindex="0" role="button" aria-label="Stomaco" style="left:54%;top:58%;width:14%;height:11%">
+            <div class="shape"></div><div class="zlabel">Stomaco</div>
+          </div>
+          <div class="zone" data-part="milza" tabindex="0" role="button" aria-label="Milza" style="left:68%;top:60%;width:8%;height:8%">
+            <div class="shape"></div><div class="zlabel tiny">Milza</div>
+          </div>
+          <div class="zone" data-part="cistifellea" tabindex="0" role="button" aria-label="Cistifellea" style="left:44%;top:64%;width:5%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Cistifellea</div>
+          </div>
+          <div class="zone" data-part="pancreas" tabindex="0" role="button" aria-label="Pancreas" style="left:45%;top:66%;width:14%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Pancreas</div>
+          </div>
+          <div class="zone" data-part="rene_sx" tabindex="0" role="button" aria-label="Rene (sinistro)" style="left:33%;top:64%;width:10%;height:9%">
+            <div class="shape"></div><div class="zlabel small">Rene (sinistro)</div>
+          </div>
+          <div class="zone" data-part="rene_dx" tabindex="0" role="button" aria-label="Rene (destro)" style="left:57%;top:64%;width:10%;height:9%">
+            <div class="shape"></div><div class="zlabel small">Rene (destro)</div>
+          </div>
+          <div class="zone" data-part="intestino_crasso" tabindex="0" role="button" aria-label="Intestino crasso" style="left:32%;top:70%;width:36%;height:4%">
+            <div class="shape"></div><div class="zlabel tiny">Intestino crasso</div>
+          </div>
+          <div class="zone" data-part="intestino_tenue" tabindex="0" role="button" aria-label="Intestino tenue" style="left:38%;top:74%;width:24%;height:10%">
+            <div class="shape"></div><div class="zlabel">Intestino tenue</div>
+          </div>
+          <div class="zone" data-part="appendice" tabindex="0" role="button" aria-label="Appendice" style="left:33%;top:84%;width:5%;height:5%">
+            <div class="shape"></div><div class="zlabel tiny">Appendice</div>
+          </div>
+          <div class="zone" data-part="vescica" tabindex="0" role="button" aria-label="Vescica" style="left:44%;top:86%;width:12%;height:7%">
+            <div class="shape"></div><div class="zlabel small">Vescica</div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="pain-flash" id="painFlash" aria-hidden="true"></div>
+      <div class="scream" id="scream" aria-hidden="true">AAAH!</div>
+      <audio id="yesAudio" preload="auto" playsinline src="data:audio/mpeg;base64,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nalkpuUtDhf5DHcv3yznjuzjat0k9P4yimik3Mx1+24yeHYvfnbdJUNgcNIugEhUPw5IEQPAgP7NG2N2VI799FpoHGUaPkovlDIGIHZQoXNQmK9DDCh91VzHTrXa/X7f////////v8xUeo8ZGYsWg4YKIzT1mRUhrEbFZerSsCuzAEdFk9Hl7AhABxLYSxcw//OExBMsK2J4AObUvEEoOH8+8JgcUixoj68TD0ceCYuncZ5DESWtJNswKIASIs2WGGAahdjIVAnzpbDSr2WcF9/cN/+pB+8KLP68ax5hLufchm1nBsedbCHlP73jLdMUIzjipAcYFCKhUWQwClJiw/oysqI+lktQ9pqjY4mHh9RXHw/cXD5pzXTPN+1+2lP////+1j2mshxCjnoyEB4AEYdaE7IqXD9lXxlVm4YXOFNMS13NTIEUwg4uRLQAtSgT//OExBUpe258AN7OvZbrGNHZZmJDAYaYVs1TnMHLzmw4gBhEDGBj4XSRIpT3AIyAmp+ow+gYAxqii7q45VZd25O2vr036qU3dUkppd09NjuvKqbkofVrNHC34l05LM8dmkiY3Fwww4LQlEWDgCQgBYGT5hp9USqe1VZlOc8cHSRMkaehzGjY91Z//////////6c2zNz1x9d/dS2yiAyG28LzHkmAd0v0uedfCPCICLBw0itQiLhQEbkQ87UzAYAU//OExCIo8ip8ANaemGpowyIfwkStMg0VA8l8HOgKnNjfMmYFhSIYcHQGzrDF8urZm4anq8vi1r6el3TzV/WNrd3824cuNyxm27MqCwj8JotKhgl/xLR5FndaZ4atkiIcxuE2M7+7Y+tbzn6/x7btn4rPePC09hzUlriFh/////93UsSlAAQALkChEYQu/6pmLoKRN9pkiGxmKrZlpM2NkIBMEFlbwCFmUiSiIUEjIggygTf5TUWckfDAFjfUhau///OExDEoo6p8AN6E3caSMcAyAlRixZlQatC+ErFV1rUzpySSUmdLjT0k1hnZ1Yp5rW8a2FPVzzxpu16tHU258QfiPUueGXeVM7nK2+x+O0OMunZTSB1c7WsyE158/OpQAUYMQyClOUZ3pun/////////WtbonomM7nSs12wsWmQtgMEND0m0WBREGEVw19NQxUpARi1kKi4CClzp3mQhCgzZjEeNMIuGM1GRWIKTxfM54pZM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"></audio>
+      <div class="yes" id="yesBubble" aria-hidden="true">YES BABY! 🎉</div>
+
+      <div class="win" id="win">
+        <div>
+          <h3>Completato! 🎉</h3>
+          <p id="winText">Hai collocato tutte le parti del corpo.</p>
+          <button class="btn" id="playAgain">Gioca ancora</button>
+        </div>
+      </div>
+    </section>
+
+    <aside class="tray">
+      <h2>Elementi da collocare</h2>
+      <p class="tip">Scegli un gruppo, poi trascina l'etichetta sulla figura — oppure toccala e tocca la zona giusta. Ogni indizio dice <em>dove</em> si trova la parte.</p>
+
+      <div class="group active" data-group="corpo" data-label="Figura intera" data-view="viewCorpo">
+        <button class="group-head" type="button">
+          <span class="chev" aria-hidden="true">&#9654;</span>
+          <span class="gname">Parti del corpo</span>
+          <span class="gcount">0/26</span>
+        </button>
+        <div class="group-body">
+          <div class="chips">
+            <button class="chip" data-part="testa" data-clue="In cima al corpo, sopra il collo: è la parte che racchiude il cervello."><span class="dot"></span>Testa</button>
+            <button class="chip" data-part="collo" data-clue="Tra la testa e le spalle: è il tratto stretto che sostiene la testa."><span class="dot"></span>Collo</button>
+            <button class="chip" data-part="spalle" data-clue="In alto, ai due lati del collo: la linea orizzontale da cui partono le braccia."><span class="dot"></span>Spalle</button>
+            <button class="chip" data-part="torace" data-clue="Sulla parte anteriore del tronco, sotto le spalle e sopra l'addome: è la cassa che protegge cuore e polmoni."><span class="dot"></span>Torace</button>
+            <button class="chip" data-part="addome" data-clue="Sulla parte anteriore del tronco, tra il torace e il bacino: la zona morbida della pancia."><span class="dot"></span>Addome</button>
+            <button class="chip" data-part="bacino" data-clue="In basso al centro del tronco, tra l'addome e le cosce: è la cintura ossea che collega il tronco alle gambe."><span class="dot"></span>Bacino</button>
+            <button class="chip" data-part="braccio_sx" data-clue="Sul lato sinistro del corpo, tra la spalla e il gomito: la parte superiore del braccio."><span class="dot"></span>Braccio (sinistro)</button>
+            <button class="chip" data-part="braccio_dx" data-clue="Sul lato destro del corpo, tra la spalla e il gomito: la parte superiore del braccio."><span class="dot"></span>Braccio (destro)</button>
+            <button class="chip" data-part="gomito_sx" data-clue="Sul lato sinistro, a metà braccio: l'articolazione tra braccio e avambraccio."><span class="dot"></span>Gomito (sinistro)</button>
+            <button class="chip" data-part="gomito_dx" data-clue="Sul lato destro, a metà braccio: l'articolazione tra braccio e avambraccio."><span class="dot"></span>Gomito (destro)</button>
+            <button class="chip" data-part="avambraccio_sx" data-clue="Sul lato sinistro, tra il gomito e il polso: la parte del braccio che porta al polso."><span class="dot"></span>Avambraccio (sinistro)</button>
+            <button class="chip" data-part="avambraccio_dx" data-clue="Sul lato destro, tra il gomito e il polso: la parte del braccio che porta al polso."><span class="dot"></span>Avambraccio (destro)</button>
+            <button class="chip" data-part="polso_sx" data-clue="Sul lato sinistro, in fondo all'avambraccio: l'articolazione stretta tra avambraccio e mano."><span class="dot"></span>Polso (sinistro)</button>
+            <button class="chip" data-part="polso_dx" data-clue="Sul lato destro, in fondo all'avambraccio: l'articolazione stretta tra avambraccio e mano."><span class="dot"></span>Polso (destro)</button>
+            <button class="chip" data-part="mano_sx" data-clue="Sul lato sinistro, all'estremità del braccio, sotto il polso: il palmo con le dita."><span class="dot"></span>Mano (sinistra)</button>
+            <button class="chip" data-part="mano_dx" data-clue="Sul lato destro, all'estremità del braccio, sotto il polso: il palmo con le dita."><span class="dot"></span>Mano (destra)</button>
+            <button class="chip" data-part="coscia_sx" data-clue="Nella gamba sinistra, tra il bacino e il ginocchio: la parte più alta e carnosa della gamba."><span class="dot"></span>Coscia (sinistra)</button>
+            <button class="chip" data-part="coscia_dx" data-clue="Nella gamba destra, tra il bacino e il ginocchio: la parte più alta e carnosa della gamba."><span class="dot"></span>Coscia (destra)</button>
+            <button class="chip" data-part="ginocchio_sx" data-clue="Nella gamba sinistra, a metà: l'articolazione tra coscia e polpaccio."><span class="dot"></span>Ginocchio (sinistro)</button>
+            <button class="chip" data-part="ginocchio_dx" data-clue="Nella gamba destra, a metà: l'articolazione tra coscia e polpaccio."><span class="dot"></span>Ginocchio (destro)</button>
+            <button class="chip" data-part="polpaccio_sx" data-clue="Nella gamba sinistra, tra il ginocchio e la caviglia: la parte posteriore carnosa."><span class="dot"></span>Polpaccio (sinistro)</button>
+            <button class="chip" data-part="polpaccio_dx" data-clue="Nella gamba destra, tra il ginocchio e la caviglia: la parte posteriore carnosa."><span class="dot"></span>Polpaccio (destro)</button>
+            <button class="chip" data-part="caviglia_sx" data-clue="Nella gamba sinistra, in basso, tra polpaccio e piede: l'articolazione stretta."><span class="dot"></span>Caviglia (sinistra)</button>
+            <button class="chip" data-part="caviglia_dx" data-clue="Nella gamba destra, in basso, tra polpaccio e piede: l'articolazione stretta."><span class="dot"></span>Caviglia (destra)</button>
+            <button class="chip" data-part="piede_sx" data-clue="Alla base della gamba sinistra, appoggiato a terra: la parte che sostiene il corpo."><span class="dot"></span>Piede (sinistro)</button>
+            <button class="chip" data-part="piede_dx" data-clue="Alla base della gamba destra, appoggiato a terra: la parte che sostiene il corpo."><span class="dot"></span>Piede (destro)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="group" data-group="faccia" data-label="La faccia" data-view="viewFaccia">
+        <button class="group-head" type="button">
+          <span class="chev" aria-hidden="true">&#9654;</span>
+          <span class="gname">Faccia</span>
+          <span class="gcount">0/18</span>
+        </button>
+        <div class="group-body">
+          <div class="chips">
+            <button class="chip" data-part="capelli" data-clue="Sulla sommità del capo, la parte più alta della testa."><span class="dot"></span>Capelli</button>
+            <button class="chip" data-part="fronte" data-clue="Sulla parte alta del viso, tra i capelli e le sopracciglia."><span class="dot"></span>Fronte</button>
+            <button class="chip" data-part="tempia_sx" data-clue="Sul lato sinistro del viso, tra la fronte e l'orecchio."><span class="dot"></span>Tempia (sinistra)</button>
+            <button class="chip" data-part="tempia_dx" data-clue="Sul lato destro del viso, tra la fronte e l'orecchio."><span class="dot"></span>Tempia (destra)</button>
+            <button class="chip" data-part="sopracciglia_sx" data-clue="Sul lato sinistro del viso, sopra l'occhio sinistro: l'arco di peli."><span class="dot"></span>Sopracciglio (sinistro)</button>
+            <button class="chip" data-part="sopracciglia_dx" data-clue="Sul lato destro del viso, sopra l'occhio destro: l'arco di peli."><span class="dot"></span>Sopracciglio (destro)</button>
+            <button class="chip" data-part="occhi_sx" data-clue="Sul lato sinistro del viso, sotto il sopracciglio: l'organo della vista."><span class="dot"></span>Occhio (sinistro)</button>
+            <button class="chip" data-part="occhi_dx" data-clue="Sul lato destro del viso, sotto il sopracciglio: l'organo della vista."><span class="dot"></span>Occhio (destro)</button>
+            <button class="chip" data-part="zigomo_sx" data-clue="Sul lato sinistro del viso, sotto l'occhio: l'osso sporgente della guancia."><span class="dot"></span>Zigomo (sinistro)</button>
+            <button class="chip" data-part="zigomo_dx" data-clue="Sul lato destro del viso, sotto l'occhio: l'osso sporgente della guancia."><span class="dot"></span>Zigomo (destro)</button>
+            <button class="chip" data-part="naso" data-clue="Al centro del viso, tra gli occhi e la bocca: la parte sporgente per respirare e annusare."><span class="dot"></span>Naso</button>
+            <button class="chip" data-part="guancia_sx" data-clue="Sul lato sinistro del viso, tra lo zigomo e la bocca."><span class="dot"></span>Guancia (sinistra)</button>
+            <button class="chip" data-part="guancia_dx" data-clue="Sul lato destro del viso, tra lo zigomo e la bocca."><span class="dot"></span>Guancia (destra)</button>
+            <button class="chip" data-part="bocca" data-clue="Al centro-basso del viso, sotto il naso: l'apertura con le labbra."><span class="dot"></span>Bocca</button>
+            <button class="chip" data-part="mento" data-clue="In fondo al viso, sotto la bocca: la parte sporgente della mandibola."><span class="dot"></span>Mento</button>
+            <button class="chip" data-part="orecchie_sx" data-clue="Sul lato sinistro della testa, all'altezza degli occhi: l'organo dell'udito."><span class="dot"></span>Orecchio (sinistro)</button>
+            <button class="chip" data-part="orecchie_dx" data-clue="Sul lato destro della testa, all'altezza degli occhi: l'organo dell'udito."><span class="dot"></span>Orecchio (destro)</button>
+            <button class="chip" data-part="collo_f" data-clue="Sotto il mento, tra la testa e le spalle: il tratto che unisce testa e tronco."><span class="dot"></span>Collo</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="group" data-group="organi" data-label="Organi interni" data-view="viewOrgani">
+        <button class="group-head" type="button">
+          <span class="chev" aria-hidden="true">&#9654;</span>
+          <span class="gname">Organi interni</span>
+          <span class="gcount">0/19</span>
+        </button>
+        <div class="group-body">
+          <div class="chips">
+            <button class="chip" data-part="cervello" data-clue="Dentro la testa, nella parte più alta: l'organo che comanda tutto il corpo."><span class="dot"></span>Cervello</button>
+            <button class="chip" data-part="laringe" data-clue="Nel collo, davanti e in alto: la 'cassa vocale' sotto la gola."><span class="dot"></span>Laringe</button>
+            <button class="chip" data-part="trachea" data-clue="Nel collo, sotto la laringe: il tubo che porta l'aria ai polmoni."><span class="dot"></span>Trachea</button>
+            <button class="chip" data-part="esofago" data-clue="Al centro del torace, dietro la trachea: il canale che porta il cibo allo stomaco."><span class="dot"></span>Esofago</button>
+            <button class="chip" data-part="polmone_sx" data-clue="Nel torace, sul lato sinistro: l'organo spugnoso per respirare."><span class="dot"></span>Polmone (sinistro)</button>
+            <button class="chip" data-part="polmone_dx" data-clue="Nel torace, sul lato destro: l'organo spugnoso per respirare."><span class="dot"></span>Polmone (destro)</button>
+            <button class="chip" data-part="cuore" data-clue="Nel torace, al centro ma leggermente verso sinistra: il muscolo che pompa il sangue."><span class="dot"></span>Cuore</button>
+            <button class="chip" data-part="diaframma" data-clue="Tra torace e addome: il muscolo a cupola che separa i due ambienti."><span class="dot"></span>Diaframma</button>
+            <button class="chip" data-part="fegato" data-clue="Nell'addome, in alto a destra: il grande organo scuro sotto il diaframma."><span class="dot"></span>Fegato</button>
+            <button class="chip" data-part="stomaco" data-clue="Nell'addome, in alto a sinistra: la sacca dove si digerisce il cibo."><span class="dot"></span>Stomaco</button>
+            <button class="chip" data-part="milza" data-clue="Nell'addome, in alto a sinistra, accanto allo stomaco: un piccolo organo del sangue."><span class="dot"></span>Milza</button>
+            <button class="chip" data-part="cistifellea" data-clue="Sotto il fegato, a destra: la piccola sacca verde che conserva la bile."><span class="dot"></span>Cistifellea</button>
+            <button class="chip" data-part="pancreas" data-clue="Dietro lo stomaco, in orizzontale: la ghiandola allungata che produce enzimi."><span class="dot"></span>Pancreas</button>
+            <button class="chip" data-part="rene_sx" data-clue="Nell'addome, in basso a sinistra, dietro gli organi: l'organo a forma di fagiolo che filtra il sangue."><span class="dot"></span>Rene (sinistro)</button>
+            <button class="chip" data-part="rene_dx" data-clue="Nell'addome, in basso a destra, dietro gli organi: l'organo a forma di fagiolo che filtra il sangue."><span class="dot"></span>Rene (destro)</button>
+            <button class="chip" data-part="intestino_crasso" data-clue="Nell'addome, a cornice attorno al centro: il grosso tubo che circonda l'intestino tenue."><span class="dot"></span>Intestino crasso</button>
+            <button class="chip" data-part="intestino_tenue" data-clue="Al centro dell'addome, sotto lo stomaco: il lungo tubo arrotolato della digestione."><span class="dot"></span>Intestino tenue</button>
+            <button class="chip" data-part="appendice" data-clue="Nell'addome, in basso a destra: il piccolo prolungamento a fondo cieco."><span class="dot"></span>Appendice</button>
+            <button class="chip" data-part="vescica" data-clue="In basso nell'addome, al centro: la sacca che raccoglie l'urina."><span class="dot"></span>Vescica</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="progress">
+        <div class="bar"><i id="barFill"></i></div>
+        <small id="progText">0 di 63 elementi collocati</small>
+      </div>
+
+      <div class="actions">
+        <button class="btn ghost-btn" id="hintBtn">Suggerimento</button>
+        <button class="btn ghost-btn" id="resetBtn">Ricomincia</button>
+      </div>
+
+      <div class="msg" id="msg" role="status" aria-live="polite"></div>
+    </aside>
+  </main>
+
+  <footer class="note">
+    <span>Gioco didattico · 63 elementi in tre tavole · trascinamento con mouse o dito</span>
+    <span>“Yes baby!” con voce umana giocosa e risata incorporata (base64, funziona offline) · buzz e urlo generati nel browser</span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  var chips    = Array.prototype.slice.call(document.querySelectorAll('.chip'));
+  var zones    = Array.prototype.slice.call(document.querySelectorAll('.zone'));
+  var views    = Array.prototype.slice.call(document.querySelectorAll('.figure .view'));
+  var msgEl    = document.getElementById('msg');
+  var barFill  = document.getElementById('barFill');
+  var progTxt  = document.getElementById('progText');
+  var statDone = document.getElementById('statDone');
+  var statErr  = document.getElementById('statErr');
+  var winBox   = document.getElementById('win');
+  var winText  = document.getElementById('winText');
+  var stageHint= document.getElementById('stageHint');
+  var stageTitle = document.getElementById('stageTitle');
+
+  var TOTAL = chips.length;
+  var solved = 0, errors = 0;
+  var selected = null, dragging = null, ghost = null, offX = 0, offY = 0;
+
+  var groups = Array.prototype.slice.call(document.querySelectorAll('.group')).map(function(g){
+    return {
+      el: g,
+      key: g.getAttribute('data-group'),
+      label: g.getAttribute('data-label'),
+      view: g.getAttribute('data-view'),
+      chips: Array.prototype.slice.call(g.querySelectorAll('.chip')),
+      count: g.querySelector('.gcount')
+    };
+  });
+  var activeGroup = groups[0];
+
+  function groupDone(g){
+    return g.chips.every(function(c){ return c.classList.contains('done'); });
+  }
+
+  function activateGroup(g){
+    if(!g) return;
+    activeGroup = g;
+    groups.forEach(function(x){
+      x.el.classList.toggle('active', x === g);
+      x.el.classList.toggle('done', groupDone(x));
+    });
+    views.forEach(function(v){
+      v.classList.toggle('is-active', v.id === g.view);
+    });
+    stageTitle.textContent = g.label;
+    updateProgress();
+  }
+
+  groups.forEach(function(g){
+    g.el.querySelector('.group-head').addEventListener('click', function(){
+      activateGroup(g);
+      setMsg('');
+    });
+  });
+
+  /* ---------- AUDIO ---------- */
+  var ac = null;
+  function audioCtx(){
+    if(!ac){
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      ac = new AC();
+    }
+    if(ac.state === 'suspended'){ ac.resume(); }
+    return ac;
+  }
+
+  function buzz(){
+    var c = audioCtx(); if(!c) return;
+    var t = c.currentTime;
+    var o1 = c.createOscillator(), g1 = c.createGain();
+    var o2 = c.createOscillator(), g2 = c.createGain();
+    var lp = c.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 900;
+    o1.type = 'sawtooth';
+    o1.frequency.setValueAtTime(132, t);
+    o1.frequency.exponentialRampToValueAtTime(72, t + 0.30);
+    o2.type = 'square';
+    o2.frequency.setValueAtTime(88, t);
+    o2.frequency.exponentialRampToValueAtTime(58, t + 0.30);
+    g1.gain.setValueAtTime(0.0001, t);
+    g1.gain.exponentialRampToValueAtTime(0.20, t + 0.012);
+    g1.gain.exponentialRampToValueAtTime(0.0001, t + 0.34);
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(0.11, t + 0.012);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.30);
+    o1.connect(g1); g1.connect(lp);
+    o2.connect(g2); g2.connect(lp);
+    lp.connect(c.destination);
+    o1.start(t); o2.start(t);
+    o1.stop(t + 0.36); o2.stop(t + 0.36);
+  }
+
+  /* ---------- URLO DI DOLORE ---------- */
+  var lastScream = -10;
+  function scream(){
+    var c = audioCtx(); if(!c) return;
+    var now = c.currentTime;
+    if(now - lastScream < 0.55) return;
+    lastScream = now;
+    var t = now + 0.05;
+    var dur = 0.95;
+    var master = c.createGain();
+    master.gain.setValueAtTime(0.0001, t);
+    master.gain.exponentialRampToValueAtTime(0.30, t + 0.035);
+    master.gain.setValueAtTime(0.30, t + dur * 0.55);
+    master.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    master.connect(c.destination);
+    var shaper = c.createWaveShaper();
+    var curve = new Float32Array(1024);
+    for(var i = 0; i < 1024; i++){
+      var x = (i / 1023) * 2 - 1;
+      curve[i] = Math.tanh(x * 2.6);
+    }
+    shaper.curve = curve;
+    shaper.oversample = '2x';
+    var src = c.createGain();
+    src.gain.value = 0.5;
+    src.connect(shaper);
+    [0, 7].forEach(function(detune){
+      var o = c.createOscillator();
+      o.type = 'sawtooth';
+      var f0 = 300 + detune;
+      o.frequency.setValueAtTime(f0, t);
+      o.frequency.exponentialRampToValueAtTime(f0 * 1.75, t + 0.16);
+      o.frequency.exponentialRampToValueAtTime(f0 * 1.55, t + 0.42);
+      o.frequency.exponentialRampToValueAtTime(f0 * 0.82, t + dur);
+      var lfo = c.createOscillator(), lg = c.createGain();
+      lfo.frequency.value = 6.2 + detune * 0.05;
+      lg.gain.value = 22;
+      lfo.connect(lg); lg.connect(o.frequency);
+      lfo.start(t); lfo.stop(t + dur + 0.05);
+      o.connect(src);
+      o.start(t); o.stop(t + dur + 0.05);
+    });
+    var nb = c.createBuffer(1, Math.floor(c.sampleRate * dur), c.sampleRate);
+    var nd = nb.getChannelData(0);
+    for(var j = 0; j < nd.length; j++){ nd[j] = (Math.random() * 2 - 1) * 0.35; }
+    var noise = c.createBufferSource(); noise.buffer = nb;
+    var nGain = c.createGain(); nGain.gain.value = 0.10;
+    noise.connect(nGain); nGain.connect(src);
+    noise.start(t); noise.stop(t + dur);
+    [
+      {f: 780,  q: 5,  g: 1.00},
+      {f: 1180, q: 7,  g: 0.75},
+      {f: 2750, q: 9,  g: 0.45},
+      {f: 3400, q: 11, g: 0.22}
+    ].forEach(function(fm){
+      var bp = c.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.setValueAtTime(fm.f, t);
+      bp.frequency.linearRampToValueAtTime(fm.f * 1.12, t + 0.30);
+      bp.frequency.linearRampToValueAtTime(fm.f * 0.95, t + dur);
+      bp.Q.value = fm.q;
+      var g = c.createGain(); g.gain.value = fm.g;
+      shaper.connect(bp); bp.connect(g); g.connect(master);
+    });
+  }
+
+  /* ---------- REAZIONE VISIVA AL DOLORE ---------- */
+  var painFlash = document.getElementById('painFlash');
+  var screamEl  = document.getElementById('scream');
+  var yesEl     = document.getElementById('yesBubble');
+
+  function painReaction(){
+    var img = document.querySelector('.figure .view.is-active img');
+    if(img){
+      img.classList.remove('recoil');
+      void img.offsetWidth;
+      img.classList.add('recoil');
+      window.setTimeout(function(){ img.classList.remove('recoil'); }, 640);
+    }
+    if(painFlash){
+      painFlash.classList.remove('on');
+      void painFlash.offsetWidth;
+      painFlash.classList.add('on');
+    }
+    if(screamEl){
+      screamEl.classList.remove('on');
+      void screamEl.offsetWidth;
+      screamEl.classList.add('on');
+    }
+  }
+
+  /* ---------- ESIBIZIONE FESTOSA "YES BABY!" ---------- */
+  var lastYes = -10;
+  var yesAudioEl = document.getElementById('yesAudio');
+  var yesAudioBroken = false;
+
+  function speakYesFallback(){
+    try{
+      if(!('speechSynthesis' in window)) return;
+      var u = new SpeechSynthesisUtterance('Yes baby! Hahaha!');
+      u.lang = 'en-US';
+      u.pitch = 1.75;     // voce acuta, scherzosa
+      u.rate = 1.12;      // un po' più veloce, entusiasta
+      u.volume = 1;
+      var voices = window.speechSynthesis.getVoices();
+      for(var i = 0; i < voices.length; i++){
+        if(/en(-|_)?(US|GB)?/i.test(voices[i].lang) && /female|samantha|zira|google us english/i.test(voices[i].name)){
+          u.voice = voices[i]; break;
+        }
+      }
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(u);
+    }catch(err){}
+  }
+
+  /* Voce umana reale incorporata in base64: si usa per prima.
+     Se l'audio non parte (autoplay bloccato, formato non supportato),
+     si ricade sulla sintesi vocale del browser. */
+  function speakYes(){
+    if(yesAudioEl && !yesAudioBroken){
+      try{
+        yesAudioEl.pause();
+        yesAudioEl.currentTime = 0;
+        var pr = yesAudioEl.play();
+        if(pr && typeof pr.then === 'function'){
+          pr.then(function(){ /* ok, voce umana in riproduzione */ })
+            .catch(function(){ speakYesFallback(); });
+        }
+        return;
+      }catch(err){ yesAudioBroken = true; }
+    }
+    speakYesFallback();
+  }
+
+  if(yesAudioEl){
+    yesAudioEl.addEventListener('error', function(){ yesAudioBroken = true; });
+  }
+
+  function cheerSound(){
+    var c = audioCtx(); if(!c) return;
+    var t = c.currentTime;
+    // arpeggio allegro ascendente (do-mi-sol-do) + scintillio
+    [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach(function(f, i){
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(f, t + i * 0.075);
+      g.gain.setValueAtTime(0.0001, t + i * 0.075);
+      g.gain.exponentialRampToValueAtTime(0.16, t + i * 0.075 + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.075 + 0.34);
+      o.connect(g); g.connect(c.destination);
+      o.start(t + i * 0.075); o.stop(t + i * 0.075 + 0.36);
+    });
+    // piccolo "pop" di gioia
+    var o2 = c.createOscillator(), g2 = c.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(880, t);
+    o2.frequency.exponentialRampToValueAtTime(1760, t + 0.12);
+    g2.gain.setValueAtTime(0.0001, t);
+    g2.gain.exponentialRampToValueAtTime(0.12, t + 0.02);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+    o2.connect(g2); g2.connect(c.destination);
+    o2.start(t); o2.stop(t + 0.24);
+  }
+
+  function celebrate(){
+    var c = audioCtx();
+    var now = c ? c.currentTime : 0;
+    if(now - lastYes < 0.35) return;
+    lastYes = now;
+
+    cheerSound();
+    speakYes();
+
+    var img = document.querySelector('.figure .view.is-active img');
+    if(img){
+      img.classList.remove('cheer');
+      void img.offsetWidth;
+      img.classList.add('cheer');
+      window.setTimeout(function(){ img.classList.remove('cheer'); }, 720);
+    }
+    if(yesEl){
+      yesEl.classList.remove('on');
+      void yesEl.offsetWidth;
+      yesEl.classList.add('on');
+    }
+  }
+
+  function ding(){
+    var c = audioCtx(); if(!c) return;
+    var t = c.currentTime;
+    [660, 990].forEach(function(f, i){
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f, t + i * 0.09);
+      g.gain.setValueAtTime(0.0001, t + i * 0.09);
+      g.gain.exponentialRampToValueAtTime(0.16, t + i * 0.09 + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.09 + 0.30);
+      o.connect(g); g.connect(c.destination);
+      o.start(t + i * 0.09); o.stop(t + i * 0.09 + 0.32);
+    });
+  }
+
+  function fanfare(){
+    var c = audioCtx(); if(!c) return;
+    var t = c.currentTime;
+    [523.25, 659.25, 783.99, 1046.5].forEach(function(f, i){
+      var o = c.createOscillator(), g = c.createGain();
+      o.type = 'triangle';
+      o.frequency.setValueAtTime(f, t + i * 0.12);
+      g.gain.setValueAtTime(0.0001, t + i * 0.12);
+      g.gain.exponentialRampToValueAtTime(0.15, t + i * 0.12 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + i * 0.12 + 0.45);
+      o.connect(g); g.connect(c.destination);
+      o.start(t + i * 0.12); o.stop(t + i * 0.12 + 0.5);
+    });
+  }
+
+  /* ---------- UI HELPERS ---------- */
+  function setMsg(text, kind){
+    msgEl.textContent = text || '';
+    msgEl.className = 'msg' + (kind ? ' ' + kind : '');
+  }
+
+  function updateProgress(){
+    var pct = Math.round((solved / TOTAL) * 100);
+    barFill.style.width = pct + '%';
+    progTxt.textContent = solved + ' di ' + TOTAL + ' elementi collocati';
+    statDone.textContent = solved;
+    statErr.textContent = errors;
+    stageHint.textContent = (TOTAL - solved) + (TOTAL - solved === 1 ? ' elemento' : ' elementi') + ' da collocare';
+    groups.forEach(function(g){
+      var d = g.chips.filter(function(c){ return c.classList.contains('done'); }).length;
+      g.count.textContent = d + '/' + g.chips.length;
+      g.el.classList.toggle('done', d === g.chips.length);
+    });
+  }
+
+  function clearSelection(){
+    if(selected){ selected.classList.remove('selected'); selected = null; }
+  }
+
+  function select(chip){
+    if(chip.classList.contains('done')) return;
+    if(selected === chip){ clearSelection(); setMsg(''); return; }
+    clearSelection();
+    selected = chip;
+    chip.classList.add('selected');
+    var clue = chip.getAttribute('data-clue');
+    setMsg(clue ? ('Indizio: ' + clue) : 'Ora tocca la zona giusta sulla figura.');
+  }
+
+  /* ---------- GAME LOGIC ---------- */
+  /* Trova la zona sotto il punto (x,y) con una tolleranza generosa:
+     prima prova l'elemento esatto, poi allarga il raggio di ricerca
+     così è molto più facile centrare il bersaglio, anche col dito. */
+  function zoneAt(x, y){
+    var el = document.elementFromPoint(x, y);
+    var z = el && el.closest ? el.closest('.zone') : null;
+    if(z) return z;
+    var best = null, bestD = Infinity;
+    var PAD = 26; // px di tolleranza attorno alla zona
+    zones.forEach(function(zone){
+      var r = zone.getBoundingClientRect();
+      if(x >= r.left - PAD && x <= r.right + PAD && y >= r.top - PAD && y <= r.bottom + PAD){
+        var cx = r.left + r.width/2, cy = r.top + r.height/2;
+        var d = Math.sqrt((x-cx)*(x-cx) + (y-cy)*(y-cy));
+        if(d < bestD){ bestD = d; best = zone; }
+      }
+    });
+    return best;
+  }
+
+  function zonesOf(part){
+    return zones.filter(function(z){ return z.getAttribute('data-part') === part; });
+  }
+
+  function attempt(chip, zone){
+    if(!chip || !zone) return;
+    if(chip.classList.contains('done')) return;
+    var part = chip.getAttribute('data-part');
+
+    if(zone.getAttribute('data-part') === part){
+      zonesOf(part).forEach(function(z){
+        z.classList.add('solved');
+        z.classList.remove('hint');
+      });
+      chip.classList.add('done');
+      chip.classList.remove('selected');
+      if(selected === chip) selected = null;
+      solved++;
+      celebrate();
+      setMsg('Yes baby! ' + chip.textContent.trim() + ' è al posto suo. 🎉', 'ok');
+      updateProgress();
+
+      if(solved === TOTAL){ win(); return; }
+
+      if(groupDone(activeGroup)){
+        var next = groups.filter(function(g){ return !groupDone(g); })[0];
+        if(next){
+          window.setTimeout(function(){
+            activateGroup(next);
+            setMsg('Gruppo completato! Passiamo a «' + next.label + '».', 'ok');
+          }, 520);
+        }
+      }
+    } else {
+      errors++;
+      zone.classList.add('shake');
+      chip.classList.add('wrong');
+      buzz();
+      scream();
+      painReaction();
+      setMsg('Buzz! La persona urla di dolore: ' + chip.textContent.trim() + ' va altrove.', 'bad');
+      updateProgress();
+      window.setTimeout(function(){
+        zone.classList.remove('shake');
+        chip.classList.remove('wrong');
+      }, 460);
+    }
+  }
+
+  function win(){
+    winText.textContent = 'Hai collocato tutte le ' + TOTAL + ' parti con ' +
+      (errors === 0 ? 'zero errori. Perfetto!' : errors + (errors === 1 ? ' errore.' : ' errori.'));
+    winBox.classList.add('show');
+    fanfare();
+    setMsg('Tavola completata!', 'ok');
+  }
+
+  function reset(){
+    solved = 0; errors = 0;
+    clearSelection();
+    chips.forEach(function(c){ c.classList.remove('done','wrong','selected','lifted'); });
+    zones.forEach(function(z){ z.classList.remove('solved','shake','hint'); });
+    winBox.classList.remove('show');
+    setMsg('');
+    activateGroup(groups[0]);
+  }
+
+  /* ---------- DRAG (pointer events: mouse + touch) ---------- */
+  function moveGhost(x, y){
+    if(!ghost) return;
+    ghost.style.left = (x - offX) + 'px';
+    ghost.style.top  = (y - offY) + 'px';
+  }
+
+  var DRAG_THRESHOLD = 6;
+  var startX = 0, startY = 0, moved = false;
+
+  chips.forEach(function(chip){
+    chip.addEventListener('pointerdown', function(e){
+      if(chip.classList.contains('done')) return;
+      if(e.button !== undefined && e.button !== 0) return;
+      e.preventDefault();
+      audioCtx();
+      var r = chip.getBoundingClientRect();
+      offX = e.clientX - r.left;
+      offY = e.clientY - r.top;
+      startX = e.clientX;
+      startY = e.clientY;
+      moved = false;
+      dragging = chip;
+      try { chip.setPointerCapture(e.pointerId); } catch(err){}
+    });
+
+    chip.addEventListener('pointermove', function(e){
+      if(dragging !== chip) return;
+      e.preventDefault();
+      if(!moved){
+        var dx = e.clientX - startX, dy = e.clientY - startY;
+        if(Math.sqrt(dx*dx + dy*dy) < DRAG_THRESHOLD) return;
+        moved = true;
+        var r = chip.getBoundingClientRect();
+        ghost = chip.cloneNode(true);
+        ghost.className = 'chip ghost';
+        ghost.style.width  = r.width + 'px';
+        ghost.style.height = r.height + 'px';
+        document.body.appendChild(ghost);
+        chip.classList.add('lifted');
+      }
+      moveGhost(e.clientX, e.clientY);
+    });
+
+    chip.addEventListener('pointerup', function(e){
+      if(dragging !== chip) return;
+      e.preventDefault();
+      var x = e.clientX, y = e.clientY;
+      var wasDrag = moved;
+      chip.classList.remove('lifted');
+      if(ghost){ ghost.remove(); ghost = null; }
+      dragging = null;
+      moved = false;
+      if(!wasDrag){
+        select(chip);
+        return;
+      }
+      var zone = zoneAt(x, y);
+      if(zone){ attempt(chip, zone); }
+      else { setMsg("Rilascia l'etichetta sopra una zona della figura."); }
+    });
+
+    chip.addEventListener('pointercancel', function(){
+      chip.classList.remove('lifted');
+      if(ghost){ ghost.remove(); ghost = null; }
+      dragging = null;
+      moved = false;
+    });
+
+    chip.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        select(chip);
+      }
+    });
+  });
+
+  zones.forEach(function(zone){
+    zone.addEventListener('click', function(){
+      if(selected){ attempt(selected, zone); }
+      else { setMsg('Prima scegli un elemento dal pannello a destra.'); }
+    });
+    zone.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){
+        e.preventDefault();
+        if(selected){ attempt(selected, zone); }
+      }
+    });
+  });
+
+  /* ---------- BUTTONS ---------- */
+  document.getElementById('resetBtn').addEventListener('click', reset);
+  document.getElementById('playAgain').addEventListener('click', reset);
+
+  document.getElementById('hintBtn').addEventListener('click', function(){
+    var target = selected;
+    if(!target){
+      target = activeGroup.chips.filter(function(c){ return !c.classList.contains('done'); })[0];
+    }
+    if(!target){
+      var g2 = groups.filter(function(g){ return !groupDone(g); })[0];
+      if(g2){
+        activateGroup(g2);
+        target = g2.chips.filter(function(c){ return !c.classList.contains('done'); })[0];
+      }
+    }
+    if(!target) return;
+    var part = target.getAttribute('data-part');
+    var zs = zonesOf(part);
+    if(!zs.length) return;
+    zs.forEach(function(z){ z.classList.add('hint'); });
+    var clue = target.getAttribute('data-clue');
+    setMsg('Suggerimento: ' + (clue || ('cerca la zona lampeggiante per «' + target.textContent.trim() + '».')));
+    window.setTimeout(function(){ zs.forEach(function(z){ z.classList.remove('hint'); }); }, 3200);
+  });
+
+  // pre-carica le voci per la sintesi vocale
+  if('speechSynthesis' in window){
+    window.speechSynthesis.getVoices();
+    window.speechSynthesis.onvoiceschanged = function(){ window.speechSynthesis.getVoices(); };
+  }
+
+  activateGroup(groups[0]);
+})();
+</script>
+</body>
+</html>
